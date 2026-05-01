@@ -26,7 +26,7 @@ export default function Hero() {
   const [roleIdx, setRoleIdx]     = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [typing, setTyping]       = useState(true);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const role  = ROLES[roleIdx];
@@ -44,7 +44,11 @@ export default function Hero() {
       }
     }, delay);
 
-    return () => clearTimeout(timerRef.current);
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
   }, [displayed, typing, roleIdx]);
 
   const isLight = theme === "light";

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Moon, Sun, Menu, X } from "lucide-react";
 import { useTheme } from "@/app/components/ui/ThemeProvider";
 import { navLinks } from "@/app/lib/data";
+import Link from "next/link";
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
@@ -55,10 +56,10 @@ export default function Navbar() {
           transition: "all 0.4s ease",
         }}>
           {/* Logo */}
-          <a href="#" className="font-display"
+          <Link href="/" className="font-display"
             style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--fg)", textDecoration: "none", flexShrink: 0 }}>
             MY<span style={{ color: "var(--emerald)" }}>.</span>
-          </a>
+          </Link>
 
           {/* Desktop links */}
           <div className="nav-desktop-links">
