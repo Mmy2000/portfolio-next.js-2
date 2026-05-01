@@ -3,9 +3,11 @@ import type { Metadata } from "next";
 import { getProjectById, getRelatedProjects } from "@/app/lib/data";
 import ProjectDetailClient from "./ProjectDetailClient";
 
-interface Props {
-  params: { id: string };
-}
+type Props = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
 export async function generateStaticParams() {
   const { projects } = await import("@/app/lib/data");
@@ -13,7 +15,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const project = getProjectById(params.id);
+  const { id } = await params;
+  const project = getProjectById(id);
   if (!project) return { title: "Project Not Found" };
   return {
     title: `${project.title} — Mahmoud Yousef`,
@@ -21,8 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ProjectPage({ params }: Props) {
-  const project = getProjectById(params.id);
+export default async function ProjectPage({ params }: Props) {
+  const { id } = await params;
+  const project = getProjectById(id);
   if (!project) notFound();
   const related = getRelatedProjects(project, 3);
   return <ProjectDetailClient project={project} related={related} />;
