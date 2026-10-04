@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Outfit, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/app/components/ui/ThemeProvider";
+import Providers from "@/app/components/ui/Providers";
 
 // Display + body — Plus Jakarta Sans: editorial, geometric, versatile
 const jakarta = Plus_Jakarta_Sans({
@@ -30,13 +30,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Mahmoud Yousef — Full Stack Developer",
   description:
-    "Full Stack Developer (Django & React) based in Cairo, Egypt. CS graduate from Zagazig University. Building scalable web apps at Hinet Soft & teaching Python at NTI.",
+    "Full Stack Developer (Django & React) based in Cairo, Egypt. CS graduate from Zagazig University. Building ERP & CRM systems at Software House Solutions & teaching Python at NTI.",
   keywords: ["Full Stack Developer", "Django", "React", "Next.js", "Python", "Mahmoud Yousef"],
   authors: [{ name: "Mahmoud Yousef" }],
   creator: "Mahmoud Yousef",
   openGraph: {
     type: "website", locale: "en_US",
-    url: "https://mahmoudyousef.dev",
+    url: "https://portfolio-next-js-2-hdbe.vercel.app",
     title: "Mahmoud Yousef — Full Stack Developer",
     description: "Full Stack Developer — Django · React · Next.js · DRF",
     siteName: "Mahmoud Yousef",
@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${jakarta.variable} ${outfit.variable} ${geistMono.variable}`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

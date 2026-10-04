@@ -1,6 +1,11 @@
 "use client";
-import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, ArrowUp } from "lucide-react";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Github, Linkedin, Mail, ArrowUp, ArrowUpRight } from "lucide-react";
+import { usePathname } from "next/navigation";
+import Magnetic from "@/app/components/ui/Magnetic";
+import { getLenis } from "@/app/components/ui/SmoothScroll";
+import { navLinks } from "@/app/lib/data";
 
 const socials = [
   { icon: Github,   href: "https://github.com/Mmy2000",              label: "GitHub" },
@@ -9,51 +14,73 @@ const socials = [
 ];
 
 export default function Footer() {
+  const ref = useRef<HTMLElement>(null);
+  const isHome = usePathname() === "/";
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"] });
+  const ctaY       = useTransform(scrollYProgress, [0, 1], [120, 0]);
+  const ctaOpacity = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
+
+  const toTop = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const lenis = getLenis();
+    if (lenis) lenis.scrollTo(0, { duration: 1.6 });
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <footer style={{ padding: "40px 24px 28px" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px" }}>
-        <div style={{ height: 1, background: "linear-gradient(90deg, transparent, var(--border-md), transparent)", marginBottom: 28 }} />
+    <footer ref={ref} style={{ position: "relative", padding: "40px 0 28px", overflow: "hidden" }}>
+      <div className="section-container">
+        {/* Giant CTA */}
+        <motion.a href={isHome ? "#contact" : "/#contact"} data-cursor-label="Say hi"
+          style={{ y: ctaY, opacity: ctaOpacity, display: "block", textDecoration: "none", marginBottom: 56 }}>
+          <div className="font-mono" style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--emerald)", marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
+            <span className="pulse-dot" /> Have a project in mind?
+          </div>
+          <div className="font-display footer-cta" style={{ display: "flex", alignItems: "flex-end", gap: "0.15em", flexWrap: "wrap" }}>
+            <span style={{ color: "var(--fg)" }}>Let&apos;s</span>
+            <span className="gradient-text">talk</span>
+            <ArrowUpRight style={{ width: "0.6em", height: "0.6em", color: "var(--accent-bright)", marginBottom: "0.08em" }} strokeWidth={1.5} />
+          </div>
+        </motion.a>
+
+        <div style={{ height: 1, background: "linear-gradient(90deg, transparent, var(--border-lg), transparent)", marginBottom: 28 }} />
 
         <div className="footer-layout">
-          {/* Logo */}
           <div>
-            <a href="#" className="font-display"
-              style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--fg)", textDecoration: "none" }}>
+            <a href="/" className="font-display"
+              style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.04em", color: "var(--fg)", textDecoration: "none" }}>
               MY<span style={{ color: "var(--emerald)" }}>.</span>
             </a>
-            <p className="font-mono" style={{ fontSize: 10.5, color: "var(--fg-subtle)", marginTop: 4, letterSpacing: "0.04em" }}>
-              Next.js · Three.js · Framer Motion · Tailwind
+            <p className="font-mono" style={{ fontSize: 10.5, color: "var(--fg-muted)", marginTop: 4, letterSpacing: "0.04em" }}>
+              Next.js · Three.js · Framer Motion · Lenis
             </p>
           </div>
 
-          {/* Socials */}
-          <div style={{ display: "flex", gap: 8 }}>
-            {socials.map(({ icon: Icon, href, label }) => (
-              <a key={href} href={href} aria-label={label} target="_blank" rel="noopener noreferrer"
-                style={{
-                  width: 36, height: 36, borderRadius: 9,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "var(--card)", border: "1px solid var(--border-md)",
-                  color: "var(--fg-muted)", textDecoration: "none",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--accent)"; el.style.color = "var(--accent)"; el.style.transform = "translateY(-3px)"; el.style.background = "var(--accent-soft)"; }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--border-md)"; el.style.color = "var(--fg-muted)"; el.style.transform = "translateY(0)"; el.style.background = "var(--card)"; }}>
-                <Icon size={14} />
+          <nav aria-label="Footer" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "6px 20px" }}>
+            {navLinks.map(l => (
+              <a key={l.href} href={isHome ? l.href : `/${l.href}`} className="link-hover font-body" style={{ fontSize: 13.5 }}>
+                {l.label}
               </a>
             ))}
-          </div>
+          </nav>
 
-          {/* Back to top */}
-          <motion.a href="#" whileHover={{ y: -3 }} className="font-mono"
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--fg-subtle)", textDecoration: "none", letterSpacing: "0.04em", transition: "color 0.2s" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--accent)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--fg-subtle)"; }}>
-            Back to top <ArrowUp size={12} />
-          </motion.a>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {socials.map(({ icon: Icon, href, label }) => (
+              <Magnetic key={href} strength={0.5}>
+                <a href={href} aria-label={label} target="_blank" rel="noopener noreferrer" className="icon-btn">
+                  <Icon size={15} />
+                </a>
+              </Magnetic>
+            ))}
+            <Magnetic strength={0.5}>
+              <a href="#" onClick={toTop} aria-label="Back to top" className="icon-btn" style={{ borderRadius: 999, background: "var(--accent-soft)", borderColor: "var(--accent-muted)", color: "var(--accent-bright)" }}>
+                <ArrowUp size={15} />
+              </a>
+            </Magnetic>
+          </div>
         </div>
 
-        <div className="font-mono" style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "var(--fg-subtle)", letterSpacing: "0.04em" }}>
+        <div className="font-mono" style={{ textAlign: "center", marginTop: 28, fontSize: 11, color: "var(--fg-muted)", letterSpacing: "0.04em" }}>
           © {new Date().getFullYear()} Mahmoud M. Yousef. All rights reserved.
         </div>
       </div>

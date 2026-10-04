@@ -2,12 +2,15 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Code2, Server, Layers, Zap } from "lucide-react";
+import { RevealLines, FadeIn, SectionLabel } from "@/app/components/ui/Reveal";
+import CountUp from "@/app/components/ui/CountUp";
+import { EASE_OUT_EXPO } from "@/app/lib/intro";
 
 const stats = [
   { value: "4+",  label: "Years Experience" },
   { value: "6+",  label: "Projects Shipped" },
-  { value: "3",   label: "Companies" },
-  { value: "A.I", label: "Grad Grade" },
+  { value: "4",   label: "Companies" },
+  { value: "AI",  label: "Excellent Grad Project" },
 ];
 
 const traits = [
@@ -17,94 +20,74 @@ const traits = [
   { icon: Zap,     title: "Performance-First",     desc: "Sub-second APIs, optimized queries, buttery-smooth UIs at 60fps." },
 ];
 
-const stagger = {
-  container: { hidden: {}, show: { transition: { staggerChildren: 0.1 } } },
-  item: {
-    hidden: { opacity: 0, y: 28 },
-    show:   { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] } },
-  },
-};
-
 export default function About() {
-  const ref    = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const gridRef = useRef(null);
+  const inView  = useInView(gridRef, { once: true, margin: "-80px" });
 
   return (
     <section id="about" className="section-pad">
-      <div ref={ref} className="section-container">
-
-        {/* Label */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-          className="section-label-row">
-          <span className="section-tag">01 — About</span>
-          <div style={{ height: 1, width: 56, background: "linear-gradient(to right, var(--border-md), transparent)" }} />
-        </motion.div>
+      <div className="section-container">
+        <SectionLabel index="01" label="About" />
 
         <div className="two-col-about">
           {/* Left */}
-          <motion.div variants={stagger.container} initial="hidden" animate={inView ? "show" : "hidden"}>
-            <motion.h2 variants={stagger.item} className="font-display heading-lg" style={{ marginBottom: 24 }}>
-              Crafting software<br />
-              <span className="gradient-text">that endures</span>
-            </motion.h2>
+          <div>
+            <RevealLines className="font-display heading-lg" style={{ marginBottom: 28 }}
+              lines={[{ text: "Crafting software" }, { text: "that endures", gradient: true }]} />
 
-            <motion.p variants={stagger.item} className="font-body"
-              style={{ fontSize: 15.5, lineHeight: 1.85, color: "var(--fg-muted)", marginBottom: 16 }}>
+            <FadeIn delay={0.15} as="p" className="font-body"
+              style={{ fontSize: 16, lineHeight: 1.85, color: "var(--fg-muted)", marginBottom: 16 }}>
               I&apos;m Mahmoud — a Computer Science graduate from Zagazig University (Class of 2023) and a Full Stack
               Developer based in Cairo, Egypt. I specialize in building production-grade web applications end-to-end.
-            </motion.p>
+            </FadeIn>
 
-            <motion.p variants={stagger.item} className="font-body"
-              style={{ fontSize: 15.5, lineHeight: 1.85, color: "var(--fg-muted)", marginBottom: 36 }}>
+            <FadeIn delay={0.22} as="p" className="font-body"
+              style={{ fontSize: 16, lineHeight: 1.85, color: "var(--fg-muted)", marginBottom: 40 }}>
               My core stack is{" "}
               <strong style={{ color: "var(--fg)", fontWeight: 600 }}>Django & DRF</strong> for robust, scalable backends, and{" "}
               <strong style={{ color: "var(--fg)", fontWeight: 600 }}>React & Next.js</strong> for fast, polished frontends.
-              Currently working at Hinet Soft and teaching Python at NTI.
-            </motion.p>
+              Currently building ERP & CRM systems at Software House Solutions and teaching Python at NTI.
+            </FadeIn>
 
             {/* Stats */}
-            <motion.div variants={stagger.item} className="stats-grid">
-              {stats.map(s => (
-                <div key={s.label} style={{
-                  padding: "18px 16px", borderRadius: 14,
-                  background: "var(--card)", border: "1px solid var(--border-md)",
-                  boxShadow: "var(--shadow-sm)",
-                }}>
-                  <div className="font-display" style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, var(--accent-bright), var(--emerald))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1, marginBottom: 4 }}>
-                    {s.value}
+            <div className="stats-grid">
+              {stats.map((s, i) => (
+                <FadeIn key={s.label} delay={0.3 + i * 0.08} className="glass-card spotlight stat-card">
+                  <div className="font-display stat-value gradient-text">
+                    <CountUp value={s.value} />
                   </div>
-                  <div className="font-mono" style={{ fontSize: 10, color: "var(--fg-subtle)", letterSpacing: "0.04em" }}>
+                  <div className="font-mono" style={{ fontSize: 10, color: "var(--fg-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                     {s.label}
                   </div>
-                </div>
+                </FadeIn>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
           {/* Right: trait cards */}
-          <div className="trait-grid">
+          <div ref={gridRef} className="trait-grid">
             {traits.map((t, i) => {
               const Icon = t.icon;
               return (
                 <motion.div key={t.title}
-                  initial={{ opacity: 0, scale: 0.93, y: 20 }}
-                  animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
-                  transition={{ duration: 0.6, delay: 0.25 + i * 0.09, ease: [0.16, 1, 0.3, 1] }}
-                  className="glass-card gradient-border" style={{ padding: 22 }}
+                  initial={{ opacity: 0, y: 40, rotateX: -20 }}
+                  animate={inView ? { opacity: 1, y: 0, rotateX: 0 } : undefined}
+                  whileHover={{ y: -6, transition: { duration: 0.4, ease: EASE_OUT_EXPO } }}
+                  transition={{ duration: 1, delay: 0.15 + i * 0.1, ease: EASE_OUT_EXPO }}
+                  className="glass-card spotlight" style={{ padding: 24, transformPerspective: 800 }}
                 >
-                  <div style={{
-                    width: 38, height: 38, borderRadius: 10,
-                    background: "var(--accent-soft)", border: "1px solid var(--accent-muted)",
-                    display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14,
-                  }}>
-                    <Icon size={17} style={{ color: "var(--accent)" }} />
+                  <div className="icon-tile" style={{ marginBottom: 18 }}>
+                    <Icon size={18} />
                   </div>
-                  <h3 className="font-display" style={{ fontSize: 14, fontWeight: 700, letterSpacing: "-0.01em", color: "var(--fg)", marginBottom: 6 }}>
+                  <h3 className="font-display" style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.01em", color: "var(--fg)", marginBottom: 8 }}>
                     {t.title}
                   </h3>
-                  <p className="font-body" style={{ fontSize: 12.5, lineHeight: 1.65, color: "var(--fg-muted)" }}>
+                  <p className="font-body" style={{ fontSize: 13.5, lineHeight: 1.7, color: "var(--fg-muted)" }}>
                     {t.desc}
                   </p>
+                  <span className="font-mono" style={{ position: "absolute", top: 20, right: 22, fontSize: 10, color: "var(--fg-subtle)", letterSpacing: "0.1em" }}>
+                    0{i + 1}
+                  </span>
                 </motion.div>
               );
             })}

@@ -40,7 +40,7 @@ export interface Experience {
   company: string;
   role: string;
   period: string;
-  location: string;
+  location?: string;
   description: string;
   highlights: string[];
   technologies: string[];
@@ -49,4 +49,20 @@ export interface Experience {
 export interface NavLink {
   label: string;
   href: string;
+}
+
+export interface Education {
+  school: string;
+  degree: string;
+  period: string;
+  grade: string;
+  project: string;
+  projectGrade: string;
+}
+
+export interface Course {
+  title: string;
+  provider: string;
+  period: string;
+  mode: string;
 }

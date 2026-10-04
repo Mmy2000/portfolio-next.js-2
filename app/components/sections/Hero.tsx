@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, Github, Linkedin, Mail, ExternalLink } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight, Github, Linkedin, Mail, ExternalLink, MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTheme } from "@/app/components/ui/ThemeProvider";
+import Magnetic from "@/app/components/ui/Magnetic";
+import { useIntroDone, EASE_OUT_EXPO } from "@/app/lib/intro";
 
 const ThreeScene = dynamic(() => import("@/app/components/ui/ThreeScene"), { ssr: false });
 
@@ -15,140 +17,174 @@ const socials = [
   { icon: Mail,     href: "mailto:mm.yousef811@gmail.com",             label: "Email" },
 ];
 
-const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 36 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.75, delay: 2.0 + delay, ease: [0.16, 1, 0.3, 1] },
-});
+function useTypewriter(words: string[], enabled: boolean) {
+  const [idx, setIdx]         = useState(0);
+  const [text, setText]       = useState("");
+  const [deleting, setDel]    = useState(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const word = words[idx];
+    const delay = !deleting ? (text === word ? 2200 : 55) : 28;
+    const t = setTimeout(() => {
+      if (!deleting) {
+        if (text.length < word.length) setText(word.slice(0, text.length + 1));
+        else setDel(true);
+      } else if (text.length > 0) {
+        setText(text.slice(0, -1));
+      } else {
+        setDel(false);
+        setIdx(i => (i + 1) % words.length);
+      }
+    }, delay);
+    return () => clearTimeout(t);
+  }, [text, deleting, idx, words, enabled]);
+
+  return text;
+}
+
+function CairoClock() {
+  const [time, setTime] = useState<string>("");
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Africa/Cairo" });
+    const tick = () => setTime(fmt.format(new Date()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <span style={{ fontVariantNumeric: "tabular-nums" }}>{time || "--:--:--"}</span>;
+}
 
 export default function Hero() {
   const { theme } = useTheme();
-  const [roleIdx, setRoleIdx]     = useState(0);
-  const [displayed, setDisplayed] = useState("");
-  const [typing, setTyping]       = useState(true);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const role  = ROLES[roleIdx];
-    const delay = typing
-      ? displayed.length === role.length ? 2200 : 55
-      : 28;
-
-    timerRef.current = setTimeout(() => {
-      if (typing) {
-        if (displayed.length < role.length) setDisplayed(role.slice(0, displayed.length + 1));
-        else setTyping(false);
-      } else {
-        if (displayed.length > 0) setDisplayed(d => d.slice(0, -1));
-        else { setRoleIdx(i => (i + 1) % ROLES.length); setTyping(true); }
-      }
-    }, delay);
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [displayed, typing, roleIdx]);
-
   const isLight = theme === "light";
+  const intro = useIntroDone();
+  const typed = useTypewriter(ROLES, intro);
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
+  const contentY       = useTransform(scrollYProgress, [0, 1], [0, -140]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const sceneY         = useTransform(scrollYProgress, [0, 1], [0, 160]);
+  const gridY          = useTransform(scrollYProgress, [0, 1], [0, 80]);
+
+  const show = (delay: number) => ({
+    initial: { opacity: 0, y: 30, filter: "blur(8px)" },
+    animate: intro ? { opacity: 1, y: 0, filter: "blur(0px)" } : undefined,
+    transition: { duration: 1, delay, ease: EASE_OUT_EXPO },
+  });
+
+  const letters = (word: string, base: number, gradient = false) =>
+    word.split("").map((ch, i) => (
+      <span key={i} className="mask-line" style={{ display: "inline-block" }}>
+        <motion.span
+          className={gradient ? "gradient-text" : undefined}
+          style={{ display: "inline-block" }}
+          initial={{ y: "110%", rotate: 8 }}
+          animate={intro ? { y: "0%", rotate: 0 } : undefined}
+          transition={{ duration: 1.1, delay: base + i * 0.045, ease: EASE_OUT_EXPO }}
+        >
+          {ch}
+        </motion.span>
+      </span>
+    ));
 
   return (
-    <section id="hero" style={{ minHeight: "100vh", display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
+    <section id="hero" ref={sectionRef}
+      style={{ minHeight: "100svh", display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
 
-      {/* Grid bg */}
-      <div className="grid-bg" style={{ position: "absolute", inset: 0, opacity: isLight ? 0.35 : 0.18, pointerEvents: "none" }} />
+      {/* Grid backdrop */}
+      <motion.div className="grid-bg grid-fade"
+        style={{ position: "absolute", inset: "-10% 0 0 0", opacity: isLight ? 0.7 : 0.55, pointerEvents: "none", y: gridY }} />
 
-      {/* Radial glow */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: isLight
-          ? "radial-gradient(ellipse 65% 55% at 70% 50%, rgba(91,77,212,0.08) 0%, transparent 70%)"
-          : "radial-gradient(ellipse 65% 55% at 70% 50%, rgba(124,109,240,0.09) 0%, transparent 70%)",
-      }} />
-
-      {/* 3D scene — responsive visibility */}
-      <div className="hero-three-scene">
-        <ThreeScene lightMode={isLight} />
-        <div style={{ position: "absolute", inset: "0 auto 0 0", width: "50%", background: `linear-gradient(to right, var(--bg), transparent)` }} />
-        <div style={{ position: "absolute", inset: "auto 0 0 0", height: "25%", background: `linear-gradient(to top, var(--bg), transparent)` }} />
-      </div>
+      {/* 3D scene */}
+      <motion.div className="hero-three-scene" style={{ y: sceneY }}>
+        <motion.div style={{ position: "absolute", inset: 0 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={intro ? { opacity: 1, scale: 1 } : undefined}
+          transition={{ duration: 2, delay: 0.1, ease: EASE_OUT_EXPO }}>
+          <ThreeScene lightMode={isLight} />
+        </motion.div>
+      </motion.div>
 
       {/* Content */}
-      <div className="hero-layout" style={{ position: "relative", zIndex: 10 }}>
+      <motion.div className="hero-layout" style={{ y: contentY, opacity: contentOpacity }}>
         <div className="hero-content">
 
-          {/* Badge */}
-          <motion.div {...fadeUp(0)} style={{ marginBottom: 24 }}>
-            <span className="section-tag">
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--emerald)", display: "inline-block", animation: "glowPulse 2s ease-in-out infinite" }} />
+          <motion.div {...show(0.05)} style={{ marginBottom: 28 }}>
+            <span className="section-tag section-tag--plain">
+              <span className="pulse-dot" />
               Available for opportunities
             </span>
           </motion.div>
 
-          {/* Name */}
-          <motion.h1 {...fadeUp(0.08)} className="font-display heading-xl" style={{ color: "var(--fg)", marginBottom: 16 }}>
-            Mahmoud<br />
-            <span className="gradient-text">Yousef</span>
-          </motion.h1>
+          <h1 className="font-display heading-xl" style={{ color: "var(--fg)", marginBottom: 26 }} aria-label="Mahmoud Yousef">
+            <span aria-hidden="true" style={{ display: "block", whiteSpace: "nowrap" }}>{letters("Mahmoud", 0.1)}</span>
+            <span aria-hidden="true" style={{ display: "block", whiteSpace: "nowrap" }}>{letters("Yousef", 0.35, true)}</span>
+          </h1>
 
-          {/* Typewriter */}
-          <motion.div {...fadeUp(0.16)} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, minHeight: 32, flexWrap: "wrap" }}>
-            <span className="font-mono" style={{ fontSize: 13, color: "var(--accent)", opacity: 0.7 }}>&gt;_</span>
-            <span className="font-mono" style={{ fontSize: 14, fontWeight: 500, color: "var(--fg-muted)" }}>{displayed}</span>
-            <span className="type-cursor" />
+          <motion.div {...show(0.55)} style={{ marginBottom: 26 }}>
+            <div className="hero-role">
+              <span className="font-mono" style={{ fontSize: 13, color: "var(--emerald)" }}>&gt;_</span>
+              <span className="font-mono" style={{ fontSize: 14, fontWeight: 500, color: "var(--fg)", minHeight: 22 }}>{typed}</span>
+              <span className="type-cursor" />
+            </div>
           </motion.div>
 
-          {/* Description */}
-          <motion.p {...fadeUp(0.24)} className="font-body"
-            style={{ fontSize: 16, lineHeight: 1.8, color: "var(--fg-muted)", marginBottom: 36, maxWidth: 480 }}>
+          <motion.p {...show(0.65)} className="font-body"
+            style={{ fontSize: "clamp(15px, 1.6vw, 17px)", lineHeight: 1.8, color: "var(--fg-muted)", marginBottom: 38, maxWidth: 500 }}>
             CS graduate from Zagazig University building real-world web products — bulletproof APIs in{" "}
             <strong style={{ color: "var(--fg)", fontWeight: 600 }}>Django & DRF</strong>, polished UIs in{" "}
             <strong style={{ color: "var(--fg)", fontWeight: 600 }}>React & Next.js</strong>.
-            Currently at Hinet Soft & NTI.
+            Currently at Software House Solutions & NTI.
           </motion.p>
 
-          {/* CTAs */}
-          <motion.div {...fadeUp(0.32)} style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 44 }}>
-            <a href="#projects" className="btn-primary">
-              View Projects <ArrowRight size={15} />
-            </a>
-            <a href="https://portfolio-next-js-sandy-ten.vercel.app/" target="_blank" rel="noopener noreferrer" className="btn-ghost">
-              <ExternalLink size={15} /> Live Portfolio
-            </a>
+          <motion.div {...show(0.75)} style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 44 }}>
+            <Magnetic>
+              <a href="#projects" className="btn-primary">
+                View Projects <ArrowRight size={15} />
+              </a>
+            </Magnetic>
+            <Magnetic>
+              <a href="https://portfolio-next-js-sandy-ten.vercel.app/" target="_blank" rel="noopener noreferrer" className="btn-ghost">
+                <ExternalLink size={15} /> Live Portfolio
+              </a>
+            </Magnetic>
           </motion.div>
 
-          {/* Socials */}
-          <motion.div {...fadeUp(0.40)} style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+          <motion.div {...show(0.85)} style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
             <span className="font-mono" style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--fg-subtle)" }}>Find me</span>
             <div style={{ height: 1, width: 28, background: "var(--border-md)" }} />
             {socials.map(({ icon: Icon, href, label }) => (
-              <a key={href} href={href} aria-label={label} target="_blank" rel="noopener noreferrer"
-                style={{
-                  width: 38, height: 38, borderRadius: 10,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "var(--card)", border: "1px solid var(--border-md)",
-                  color: "var(--fg-muted)", textDecoration: "none",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--accent)"; el.style.color = "var(--accent)"; el.style.transform = "translateY(-3px)"; el.style.background = "var(--accent-soft)"; }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--border-md)"; el.style.color = "var(--fg-muted)"; el.style.transform = "translateY(0)"; el.style.background = "var(--card)"; }}
-              >
-                <Icon size={16} />
-              </a>
+              <Magnetic key={href} strength={0.5}>
+                <a href={href} aria-label={label} target="_blank" rel="noopener noreferrer" className="icon-btn">
+                  <Icon size={16} />
+                </a>
+              </Magnetic>
             ))}
           </motion.div>
         </div>
-      </div>
-
-      {/* Scroll hint */}
-      <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3.2 }}
-        style={{ position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}
-      >
-        <span className="font-mono" style={{ fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--fg-subtle)" }}>scroll</span>
-        <div className="scroll-line" />
       </motion.div>
+
+      {/* Bottom bar */}
+      <motion.div className="hero-bottom"
+        initial={{ opacity: 0 }} animate={intro ? { opacity: 1 } : undefined} transition={{ delay: 1.2, duration: 1 }}>
+        <div className="hero-meta font-mono" style={{ fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}><MapPin size={11} /> Cairo, Egypt</span>
+          <span style={{ color: "var(--fg-subtle)" }}>Local time — <CairoClock /></span>
+        </div>
+        <a href="#about" aria-label="Scroll to about" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, textDecoration: "none", margin: "0 auto" }}>
+          <div className="scroll-mouse"><span /></div>
+          <span className="font-mono" style={{ fontSize: 9, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--fg-subtle)" }}>Scroll</span>
+        </a>
+        <div className="hero-meta font-mono" style={{ fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", textAlign: "right", alignItems: "flex-end" }}>
+          <span>Django · React · Next.js</span>
+          <span style={{ color: "var(--fg-subtle)" }}>Open to remote work</span>
+        </div>
+      </motion.div>
+
+      {/* Fade into the next section */}
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 160, background: "linear-gradient(to top, var(--bg), transparent)", pointerEvents: "none", zIndex: 5 }} />
     </section>
   );
 }

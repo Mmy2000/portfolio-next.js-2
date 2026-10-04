@@ -1,4 +1,4 @@
-import type { Project, SkillCategory, Experience, NavLink } from "@/app/types";
+import type { Project, SkillCategory, Experience, NavLink, Education, Course } from "@/app/types";
 
 export const navLinks: NavLink[] = [
   { label: "About", href: "#about" },
@@ -37,6 +37,8 @@ export const projects: Project[] = [
       { title: "Post Interactions", description: "Create text/image posts, like, comment, and view reactions with Framer Motion animations." },
       { title: "Notification System", description: "Real-time notifications for friend requests, likes, and comments." },
       { title: "Dark Mode", description: "Persistent dark/light mode toggle with system preference detection." },
+      { title: "User Profiles", description: "View and update personal info, profile pictures, and bios." },
+      { title: "Search", description: "Quickly find users and friends via an optimized search interface." },
     ],
     metrics: ["Real-time WebSocket notifications", "Optimistic UI updates", "JWT-secured endpoints", "Mobile-first responsive design"],
   },
@@ -205,6 +207,7 @@ export const skillCategories: SkillCategory[] = [
       { name: "PostgreSQL", level: 88 },
       { name: "REST Framework", level: 95 },
       { name: "Celery & Redis", level: 82 },
+      { name: "Express.js & Nest.js", level: 72 },
     ],
   },
   {
@@ -226,7 +229,7 @@ export const skillCategories: SkillCategory[] = [
       { name: "Material UI", level: 85 },
       { name: "Bootstrap", level: 88 },
       { name: "Framer Motion", level: 80 },
-      { name: "Machine Learning", level: 72 },
+      { name: "Machine & Deep Learning", level: 72 },
     ],
   },
 ];
@@ -234,6 +237,24 @@ export const skillCategories: SkillCategory[] = [
 export const experiences: Experience[] = [
   {
     id: "1",
+    company: "Software House Solutions",
+    role: "Full Stack Developer",
+    period: "Jun 2026 — Present",
+    description: "Developing and maintaining full-stack ERP and CRM applications — turning business requirements into reliable, scalable modules.",
+    highlights: [
+      "Develop and maintain full-stack ERP and CRM applications",
+      "Build modules for inventory, sales, purchases, finance, and customer management",
+      "Design and implement new features based on business requirements",
+      "Optimize application performance and improve database efficiency",
+      "Integrate third-party services and internal business systems",
+      "Collaborate with stakeholders to translate business needs into technical solutions",
+      "Participate in code reviews, testing, deployment, and ongoing system enhancements",
+      "Ensure application security, scalability, and maintainability",
+    ],
+    technologies: ["ERP", "CRM", "Inventory", "Sales", "Finance"],
+  },
+  {
+    id: "2",
     company: "National Telecommunication Institute (NTI)",
     role: "Python Instructor",
     period: "Jul 2025 — Present",
@@ -243,28 +264,29 @@ export const experiences: Experience[] = [
       "Designed a structured curriculum covering Python, OOP, file handling, and libraries (pandas, NumPy, matplotlib)",
       "Led hands-on coding sessions and practical exercises to strengthen problem-solving skills",
       "Evaluated students through projects, quizzes, and code reviews with constructive feedback",
-      "Continuously updated course materials to reflect the latest industry practices",
+      "Contributed to curriculum development and continuously updated course materials to reflect the latest industry practices",
     ],
     technologies: ["Python", "pandas", "NumPy", "matplotlib", "OOP"],
   },
   {
-    id: "2",
+    id: "3",
     company: "Hinet Soft",
     role: "Backend Developer — Django & ERPNext",
-    period: "Nov 2024 — Present",
+    period: "Nov 2024 — Apr 2026",
     location: "Mansoura, Egypt",
-    description: "Developing and maintaining scalable web applications and APIs using Django, Django REST Framework, and ERPNext.",
+    description: "Developed and maintained scalable web applications and APIs using Django, Django REST Framework, and ERPNext.",
     highlights: [
       "Developed and maintained scalable APIs with Django REST Framework and ERPNext",
       "Designed efficient database models, optimized queries, and implemented business logic",
       "Integrated third-party services for authentication, payments, and real-time features",
-      "Ensured performance through caching, background tasks (Celery), and query optimization",
+      "Ensured performance through caching, background tasks, and query optimization",
       "Wrote tests for code quality and implemented security best practices",
+      "Collaborated with cross-functional teams to deliver seamless user experiences",
     ],
     technologies: ["Django", "DRF", "ERPNext", "PostgreSQL", "Celery", "Redis", "Python"],
   },
   {
-    id: "3",
+    id: "4",
     company: "Z Digital Marketing",
     role: "Full Stack Developer — Django & React",
     period: "Jan 2024 — Oct 2024",
@@ -272,12 +294,28 @@ export const experiences: Experience[] = [
     description: "Developed and maintained full-stack web applications for a UAE-based digital marketing agency — working remotely across Django backend and React frontend.",
     highlights: [
       "Built and maintained web applications using Django backend and React frontend",
-      "Improved application performance, security, and developed new product features",
-      "Demonstrated strong technical skills, teamwork, and effective remote communication",
-      "Worked across Business Bay (Dubai) and Al Hail (Fujairah) project teams remotely",
+      "Improved application performance and security, and developed new product features",
+      "Demonstrated strong technical skills, commitment, teamwork, and effective communication",
+      "Worked remotely with Business Bay (Dubai) and Al Hail (Fujairah) project teams",
     ],
     technologies: ["Django", "React", "JavaScript", "TypeScript", "REST API", "PostgreSQL"],
   },
+];
+
+export const education: Education = {
+  school: "Zagazig University",
+  degree: "Bachelor's Degree in Computer Science",
+  period: "Sep 2019 — Jul 2023",
+  grade: "Very Good",
+  project: "Neurological Disease Diagnostic System Using Artificial Intelligence",
+  projectGrade: "Excellent",
+};
+
+export const courses: Course[] = [
+  { title: "Mastering Node.js, TypeScript, PostgreSQL, MVC, Express.js & Nest.js", provider: "Muhammad Naga", period: "Dec 2025 — Apr 2026", mode: "Online" },
+  { title: "Front-End Development", provider: "Route Academy", period: "Dec 2023 — Jul 2024", mode: "Cairo, Egypt" },
+  { title: "Python Developer Using Django", provider: "Eng. Mahmoud Ahmed", period: "Aug 2023 — Dec 2023", mode: "Online" },
+  { title: "Machine Learning Nanodegree", provider: "Eng. Tamer Eid & Eng. Hadelin de Ponteves", period: "Jan 2023 — Aug 2023", mode: "Online" },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
